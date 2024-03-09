@@ -1,0 +1,95 @@
+#include <stdio.h>
+#include <stdbool.h>
+
+#define NUM_COURSES 7
+#define PASS_MARK 10
+
+typedef struct {
+    char name[20];
+    float td, tp, quiz, exam, cc, final_mark, rem;
+} Course;
+
+void collectMarks(Course courses[]);
+float calculateAverage(float td, float tp, float quiz);
+void computeFinalMarks(Course courses[]);
+void checkRemediation(Course courses[]);
+void displayResults(Course courses[]);
+
+int main() {
+    Course modules[NUM_COURSES] = {
+        {"ALG"},
+        {"ANA"},
+        {"ALGEBRE"},
+        {"SYS"},
+        {"PRO"},
+        {"PHE"},
+        {"ENG"}
+    };
+
+    collectMarks(modules);
+    computeFinalMarks(modules);
+    checkRemediation(modules);
+    displayResults(modules);
+
+    return 0;
+}
+
+void collectMarks(Course courses[]) {
+    for (int i = 0; i < NUM_COURSES; i++) {
+        if (i < 4) {
+            printf("Enter marks for %s (TD TP QUIZ EXAM CC): ", courses[i].name);
+            scanf("%f %f %f %f %f", &courses[i].td, &courses[i].tp, &courses[i].quiz, &courses[i].exam, &courses[i].cc);
+        } else if (i == 4) {
+            printf("Enter marks for %s (TP QUIZ EXAM CC): ", courses[i].name);
+            scanf("%f %f %f %f", &courses[i].tp, &courses[i].quiz, &courses[i].exam, &courses[i].cc);
+        } else if (i == 5) {
+            printf("Enter marks for %s (TD QUIZ EXAM CC): ", courses[i].name);
+            scanf("%f %f %f %f", &courses[i].td, &courses[i].quiz, &courses[i].exam, &courses[i].cc);
+        } else if (i == 6) {
+            printf("Enter marks for %s (EXAM): ", courses[i].name);
+            scanf("%f", &courses[i].exam);
+        }
+    }
+}
+
+float calculateAverage(float td, float tp, float quiz) {
+    return (td + tp + quiz) / 3;
+}
+
+void computeFinalMarks(Course courses[]) {
+    for (int i = 0; i < NUM_COURSES; i++) {
+        if (i < 6) {
+            if (strcmp(courses[i].name, "ENG") == 0)
+                courses[i].final_mark = courses[i].exam;
+            else
+                courses[i].final_mark = 0.4 * calculateAverage(courses[i].td, courses[i].tp, courses[i].quiz) + 0.6 * courses[i].exam;
+        } else {
+            courses[i].final_mark = courses[i].exam;
+        }
+    }
+}
+
+void checkRemediation(Course courses[]) {
+    float sum_rem = 0;
+    int num_remedial = 0;
+
+    for (int i = 0; i < NUM_COURSES; i++) {
+        if (courses[i].final_mark < PASS_MARK) {
+            courses[i].rem = 1;
+            num_remedial++;
+            sum_rem += courses[i].final_mark;
+        }
+    }
+
+    if (num_remedial > 0) {
+        printf("Remedial exams needed in %d courses\n", num_remedial);
+        printf("Average of remedial exams: %.2f\n", sum_rem / num_remedial);
+    }
+}
+
+void displayResults(Course courses[]) {
+    printf("Results:\n");
+    for (int i = 0; i < NUM_COURSES; i++) {
+        printf("%s: %s\n", courses[i].name, courses[i].final_mark >= PASS_MARK ? "Pass" : "Fail");
+    }
+}
